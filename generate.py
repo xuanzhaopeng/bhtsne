@@ -27,7 +27,7 @@ def readLmdb(lmdb_file, model_def_path, model_weights_path, layer_name, length):
 		counter = counter + 1
         print (X.shape)
 	print (labels.shape)
-	Math.savetxt('test.out', X, delimiter="\t")
+	Math.savetxt('in.out', X, delimiter="\t")
 	
 if  __name__ == "__main__":
         readLmdb('/home/ubuntu/caffe/examples/mnist/mnist_test_lmdb', 
