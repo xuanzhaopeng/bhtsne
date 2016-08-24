@@ -1,29 +1,3 @@
-#!/usr/bin/env python
-
-'''
-A simple Python wrapper for the bh_tsne binary that makes it easier to use it
-for TSV files in a pipeline without any shell script trickery.
-
-Note: The script does some minimal sanity checking of the input, but don't
-    expect it to cover all cases. After all, it is a just a wrapper.
-
-Example:
-
-    > echo -e '1.0\t0.0\n0.0\t1.0' | ./bhtsne.py -d 2 -p 0.1
-    -2458.83181442  -6525.87718385
-    2458.83181442   6525.87718385
-
-The output will not be normalised, maybe the below one-liner is of interest?:
-
-    python -c 'import numpy;  from sys import stdin, stdout;
-        d = numpy.loadtxt(stdin); d -= d.min(axis=0); d /= d.max(axis=0);
-        numpy.savetxt(stdout, d, fmt="%.8f", delimiter="\t")'
-
-Authors:     Pontus Stenetorp    <pontus stenetorp se>
-             Philippe Remy       <github: philipperemy>
-Version:    2016-03-08
-'''
-
 # Copyright (c) 2013, Pontus Stenetorp <pontus stenetorp se>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
@@ -113,6 +87,7 @@ def init_bh_tsne(input_file, workdir, no_dims=DEFAULT_NO_DIMS, initial_dims=INIT
 
     samples = np.asarray(samples, dtype='float64')
 
+    print "Samples :{}".format(samples.shape)
     if use_pca:
         samples = samples - np.mean(samples, axis=0)
         cov_x = np.dot(np.transpose(samples), samples)
@@ -135,6 +110,7 @@ def init_bh_tsne(input_file, workdir, no_dims=DEFAULT_NO_DIMS, initial_dims=INIT
 
     # Note: The binary format used by bh_tsne is roughly the same as for
     #   vanilla tsne
+    print "Work dir : {}".format(workdir)
     with open(path_join(workdir, 'data.dat'), 'wb') as data_file:
         # Write the bh_tsne header
         data_file.write(pack('iiddii', sample_count, sample_dim, theta, perplexity, no_dims, max_iter))
@@ -150,7 +126,7 @@ def bh_tsne(workdir, verbose=False):
 
     # Call bh_tsne and let it do its thing
     with open(devnull, 'w') as dev_null:
-        bh_tsne_p = Popen((abspath(BH_TSNE_BIN_PATH), ), cwd=workdir,
+        bh_tsne_p = Popen((abspath(BH_TSNE_BIN_PATH), "--verbose"), cwd=workdir,
                 # bh_tsne is very noisy on stdout, tell it to use stderr
                 #   if it is to print any output
                 stdout=stderr if verbose else dev_null)
